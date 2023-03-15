@@ -10,7 +10,32 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 const UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36";
 
+// cargo-boj login [--id=<id>]
+//   login to BOJ with <id>. password is entered through a prompt.
+//   if login is successful, id and cookies are stored for submitting solutions.
+//   if id is supplied, it is used to log in to BOJ, and the id is stored for later runs.
+//   if id is not supplied, the stored id is used; if it doesn't exist, the command fails.
+// cargo-boj logout
+//   delete id and cookies. may be useful if using cargo-boj on a shared computer.
+// cargo-boj test <prob> [--bin=<bin>]
+//   fetch sample tests for <prob> and run tests on the binary.
+//   sample tests are cached by problem id.
+//   if bin is supplied, uses its bin name. if set is also set, it is stored for later runs.
+//   if bin is not supplied, the stored bin name is used; if it doesn't exist, defaults to `main`.
+// cargo-boj submit <prob> [--path=<path>] [--lang-id=<lang>] [--code-open=(y|n|acc)]
+//   submit the file at <path> as the solution to problem <prob>.
+//   each option defaults to:
+//   path = src/main.rs or src/bin/main.rs
+//   lang-id = 113 (Rust 2021)
+//   code-open = follow account default
+// cargo-boj set [--bin=<bin>] [--path=<path>]
+//   store settings for test binary name and submit file path.
+
 fn main() -> Result<()> {
+    Ok(())
+}
+
+fn _main() -> Result<()> {
     let should_login = false;
     let id = "";
     let password = "";
