@@ -1,19 +1,24 @@
+use tokio::runtime::Runtime;
 use tokio::process::Command;
 use tokio::time::Instant;
 use std::process::Stdio;
 use fantoccini::{ClientBuilder, Locator};
 use serde_json::{Value::Object, json};
-use super::{Result, UA};
+use crate::{Result, UA};
+use crate::datastore::Cookies;
 
-pub async fn login_procedure(id: &str, password: &str) -> Result<(String, String)> {
-    cargo_install_geckodriver().await?;
-    let mut instance = geckodriver_instance().await?;
-    let client = new_client().await?;
-    boj_login(&client, id, password).await?;
-    let cookies = login_info(&client).await?;
-    client.close().await?;
-    instance.kill().await?;
-    Ok(cookies)
+pub fn login_procedure(id: &str, password: &str) -> Result<Option<Cookies>> {
+    let rt = Runtime::new()?;
+    rt.block_on(async {
+        cargo_install_geckodriver().await?;
+        let mut instance = geckodriver_instance().await?;
+        let client = new_client().await?;
+        let success = boj_login(&client, id, password).await?;
+        let cookies = if success { Some(login_info(&client).await?) } else { None };
+        client.close().await?;
+        instance.kill().await?;
+        Ok(cookies)
+    })
 }
 
 async fn cargo_install_geckodriver() -> Result<()> {
@@ -54,14 +59,14 @@ async fn new_client() -> Result<fantoccini::Client> {
     Ok(c)
 }
 
-async fn boj_login(client: &fantoccini::Client, id: &str, password: &str) -> Result<()> {
+async fn boj_login(client: &fantoccini::Client, id: &str, password: &str) -> Result<bool> {
     client.set_ua(UA).await?;
     let login_page = "https://www.acmicpc.net/login?next=%2F";
     client.goto(login_page).await?;
     let url = client.current_url().await?;
     if url.as_str() != login_page {
-        println!("Already logged in");
-        return Ok(());
+        println!("Already logged in.");
+        return Ok(true);
     }
     let el_id = client.find(Locator::Css(r#"[name="login_user_id"]"#)).await?;
     let el_pass = client.find(Locator::Css(r#"[name="login_password"]"#)).await?;
@@ -77,14 +82,15 @@ async fn boj_login(client: &fantoccini::Client, id: &str, password: &str) -> Res
     let url = client.current_url().await?;
     if url.as_str() != "https://www.acmicpc.net/" {
         println!("Login failed!");
+        return Ok(false);
     }
-    Ok(())
+    Ok(true)
 }
 
-async fn login_info(client: &fantoccini::Client) -> Result<(String, String)> {
+async fn login_info(client: &fantoccini::Client) -> Result<Cookies> {
     let onlinejudge = client.get_named_cookie("OnlineJudge").await?.value().to_owned();
-    println!("OnlineJudge = {}", onlinejudge);
+    // println!("OnlineJudge = {}", onlinejudge);
     let bojautologin = client.get_named_cookie("bojautologin").await?.value().to_owned();
-    println!("bojautologin = {}", bojautologin);
-    Ok((onlinejudge, bojautologin))
+    // println!("bojautologin = {}", bojautologin);
+    Ok(Cookies { onlinejudge, bojautologin })
 }
