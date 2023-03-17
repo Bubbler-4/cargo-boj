@@ -43,6 +43,8 @@ pub fn submit_solution(cookies: &Cookies, problem_id: &str, source: &str, langua
     let mut res = client.post(&submit_page).form(&form_data).send().unwrap();
     output.clear();
     res.read_to_string(&mut output).unwrap();
-    println!("{}", output);
-    println!("{:?}", res);
+    // println!("{}", output);
+    // println!("{:?}", res);
+    let url = res.url().as_str();
+    println!("Submit successful. Check your submission at {}", url);
 }

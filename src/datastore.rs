@@ -36,6 +36,7 @@ impl Credentials {
         serde_json::from_str(&config_str).unwrap_or_default()
     }
 
+    #[allow(unused)]
     pub fn update_id(&mut self, id: &str) {
         self.id = Some(id.to_string());
         let config_str = serde_json::to_string(self).unwrap();

@@ -1,13 +1,16 @@
 use bpaf::*;
 use bpaf::batteries::cargo_helper;
 
+use crate::datastore::Cookies;
+
 pub enum Opts {
     Login(Login),
     Submit(Submit),
 }
 
+#[derive(Clone)]
 pub struct Login {
-    pub id: Option<String>,
+    pub cookies: Option<Cookies>,
 }
 
 pub struct Submit {
@@ -22,16 +25,18 @@ pub fn cargo_boj_opts() -> Opts {
 }
 
 fn cargo_boj_login() -> impl Parser<Login> {
-    let id = short('i')
-        .long("id")
-        .help("BOJ ID")
-        .argument("ID")
-        .optional();
-    construct!(Login { id })
+    let bojautologin = long("bojautologin")
+        .help("The value of cookie `bojautologin`")
+        .argument("str");
+    let onlinejudge = long("onlinejudge")
+        .help("The value of cookie `OnlineJudge`")
+        .argument("str");
+    let cookies = construct!(Cookies { bojautologin, onlinejudge }).optional();
+    construct!(Login { cookies })
         .to_options()
-        .descr("Log in to BOJ to submit solutions.")
-        .header("Footer")
-        .footer("Footer")
+        .descr("Store BOJ login information for submitting solutions.")
+        //.header("Footer")
+        //.footer("Footer")
         .command("login")
 }
 
@@ -45,6 +50,6 @@ fn cargo_boj_submit() -> impl Parser<Submit> {
     construct!(Submit { problem_id, language })
         .to_options()
         .descr("Submit a solution to a BOJ problem.")
-        .footer("Footer 2")
+        //.footer("Footer 2")
         .command("submit")
 }
