@@ -24,7 +24,7 @@ pub fn submit_solution(cookies: &Cookies, problem_id: &str, source: &str, langua
     let mut res = get.send().unwrap();
     let mut output = String::new();
     res.read_to_string(&mut output).unwrap();
-    if !res.url().as_str().contains("submit") {
+    if res.url().as_str().contains("login") {
         println!("Submit page access failed. Please log in.");
         return;
     }
