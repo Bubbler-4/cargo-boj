@@ -13,3 +13,5 @@ directories = "4"
 bpaf = { version = "0.7", features = ["batteries"] }
 serde = { version = "1", features = ["derive"] }
 once_cell = "1"
+console = "0.15"
+similar = "2"

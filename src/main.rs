@@ -1,6 +1,7 @@
 mod submit;
 mod optparse;
 mod datastore;
+mod test;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 const UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36";
@@ -9,19 +10,19 @@ const UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (
 // cargo-boj login [--bojautologin=<str> --onlinejudge=<str>]
 //   register BOJ login cookie information.
 //   if not specified in the flag, the cookies are entered through a prompt.
-// cargo-boj test <prob> [--bin=<bin>]
+// cargo-boj test <prob> [--bin=<bin> | --cmd=<cmd>]
 //   fetch sample tests for <prob> and run tests on the binary.
 //   sample tests are cached by problem id.
-//   if bin is supplied, uses its bin name. if set is also set, it is stored for later runs.
-//   if bin is not supplied, the stored bin name is used; if it doesn't exist, defaults to `main`.
-// cargo-boj submit <prob> [--path=<path>] [--lang-id=<lang>] [--code-open=(y|n|acc)]
+//   if bin is supplied, uses its bin name. assumes it is a rust binary.
+//   you can use cmd to run a non-rust program instead.
+//   (when using cmd, it is recommended to compile beforehand to get more accurate timings.)
+//   if neither is supplied, assumes --bin=main.
+// cargo-boj submit <prob> [--path=<path>] [--lang-id=<lang>] [--code-open=(y|n|ac)]
 //   submit the file at <path> as the solution to problem <prob>.
 //   each option defaults to:
 //   path = src/main.rs or src/bin/main.rs
 //   lang-id = 113 (Rust 2021)
 //   code-open = follow account default
-// cargo-boj set [--bin=<bin>] [--path=<path>]
-//   store settings for test binary name and submit file path.
 
 use optparse::*;
 use std::fs;
@@ -51,21 +52,33 @@ fn main() -> Result<()> {
             credentials.update_cookie(&cookies);
             println!("Cookies set.");
         }
-        Opts::Submit(Submit { problem_id, language }) => {
+        Opts::Test(Test { problem_id, bin_or_cmd }) => {
+            let bin_or_cmd = bin_or_cmd.unwrap_or(BinOrCmd::Bin("main".to_string()));
+            test::test(&problem_id, &bin_or_cmd);
+        }
+        Opts::Submit(Submit { problem_id, path, language, code_open }) => {
             let language = language.unwrap_or(113);
             let credentials = datastore::Credentials::load();
             let Some(cookies) = &credentials.cookies else {
                 println!("Use `cargo-boj login` first to log in.");
                 return Ok(());
             };
-            let source = ["src/main.rs", "src/bin/main.rs"]
-                .into_iter()
-                .find_map(|file| fs::read_to_string(file).ok());
+            let source = if let Some(path) = &path {
+                fs::read_to_string(path).ok()
+            } else {
+                ["src/main.rs", "src/bin/main.rs"]
+                    .into_iter()
+                    .find_map(|file| fs::read_to_string(file).ok())
+            };
             let Some(source) = source else {
-                println!("Neither src/main.rs nor src/bin/main.rs not found. Try running again at the crate root.");
+                if let Some(path) = &path {
+                    println!("{} not found.", path);
+                } else {
+                    println!("Neither src/main.rs nor src/bin/main.rs not found. Try running again at the crate root.");
+                }
                 return Ok(());
             };
-            submit::submit_solution(cookies, &problem_id, &source, language);
+            submit::submit_solution(cookies, &problem_id, &source, language, code_open.map(|x| x.to_string()));
         }
     }
     Ok(())
