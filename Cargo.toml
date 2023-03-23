@@ -2,8 +2,13 @@
 name = "cargo-boj"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT"
+description = "Cargo-BOJ: test and submit solutions to BOJ problems"
+homepage = "https://github.com/Bubbler-4/cargo-boj"
+repository = "https://github.com/Bubbler-4/cargo-boj"
+readme = "README.md"
+keywords = ["cli", "web"]
+categories = ["command-line-utilities", "development-tools::cargo-plugins"]
 
 [dependencies]
 reqwest = { version = "0.11", features = ["blocking", "cookies"] }
