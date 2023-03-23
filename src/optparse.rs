@@ -1,9 +1,9 @@
-use std::str::FromStr;
-use std::fmt;
 use std::error::Error;
+use std::fmt;
+use std::str::FromStr;
 
-use bpaf::*;
 use bpaf::batteries::cargo_helper;
+use bpaf::*;
 
 use crate::datastore::Cookies;
 
@@ -75,7 +75,8 @@ impl ToString for CodeOpen {
             CodeOpen::Yes => "open",
             CodeOpen::No => "close",
             CodeOpen::YesOnAc => "onlyaccepted",
-        }.to_string()
+        }
+        .to_string()
     }
 }
 
@@ -83,7 +84,9 @@ pub fn cargo_boj_opts() -> Opts {
     let login = construct!(Opts::Login(cargo_boj_login()));
     let test = construct!(Opts::Test(cargo_boj_test()));
     let submit = construct!(Opts::Submit(cargo_boj_submit()));
-    cargo_helper("boj", construct!([login, test, submit])).to_options().run()
+    cargo_helper("boj", construct!([login, test, submit]))
+        .to_options()
+        .run()
 }
 
 fn cargo_boj_login() -> impl Parser<Login> {
@@ -93,7 +96,11 @@ fn cargo_boj_login() -> impl Parser<Login> {
     let onlinejudge = long("onlinejudge")
         .help("The value of cookie `OnlineJudge`")
         .argument("str");
-    let cookies = construct!(Cookies { bojautologin, onlinejudge }).optional();
+    let cookies = construct!(Cookies {
+        bojautologin,
+        onlinejudge
+    })
+    .optional();
     construct!(Login { cookies })
         .to_options()
         .descr("Store BOJ login information for submitting solutions.")
@@ -115,10 +122,13 @@ fn cargo_boj_test() -> impl Parser<Test> {
     let bin = construct!(BinOrCmd::Bin(bin));
     let cmd = construct!(BinOrCmd::Cmd(cmd));
     let bin_or_cmd = construct!([bin, cmd]).optional();
-    construct!(Test { bin_or_cmd, problem_id })
-        .to_options()
-        .descr("Test a solution against example tests.")
-        .command("test")
+    construct!(Test {
+        bin_or_cmd,
+        problem_id
+    })
+    .to_options()
+    .descr("Test a solution against example tests.")
+    .command("test")
 }
 
 fn cargo_boj_submit() -> impl Parser<Submit> {
@@ -138,9 +148,14 @@ fn cargo_boj_submit() -> impl Parser<Submit> {
         .help("Whether to open code to public. Options are: y(yes), n(no), ac(yes on AC)")
         .argument("OPT")
         .optional();
-    construct!(Submit { problem_id, path, language, code_open })
-        .to_options()
-        .descr("Submit a solution to a BOJ problem.")
-        //.footer("Footer 2")
-        .command("submit")
+    construct!(Submit {
+        problem_id,
+        path,
+        language,
+        code_open
+    })
+    .to_options()
+    .descr("Submit a solution to a BOJ problem.")
+    //.footer("Footer 2")
+    .command("submit")
 }

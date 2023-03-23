@@ -1,13 +1,25 @@
-use reqwest::{cookie::Jar, Url, blocking::Client};
-use std::sync::Arc;
-use std::io::{Read, Write};
-use scraper::{Html, Selector};
-use crate::UA;
 use crate::datastore::Cookies;
+use crate::UA;
+use reqwest::{blocking::Client, cookie::Jar, Url};
+use scraper::{Html, Selector};
+use std::io::{Read, Write};
+use std::sync::Arc;
 
-pub fn submit_solution(cookies: &Cookies, problem_id: &str, source: &str, language: usize, code_open: Option<String>) {
-    let Cookies { bojautologin, onlinejudge } = cookies;
-    let cookie = format!("bojautologin={}; domain=.acmicpc.net, OnlineJudge={}; domain=.acmicpc.net", bojautologin, onlinejudge);
+pub fn submit_solution(
+    cookies: &Cookies,
+    problem_id: &str,
+    source: &str,
+    language: usize,
+    code_open: Option<String>,
+) {
+    let Cookies {
+        bojautologin,
+        onlinejudge,
+    } = cookies;
+    let cookie = format!(
+        "bojautologin={}; domain=.acmicpc.net, OnlineJudge={}; domain=.acmicpc.net",
+        bojautologin, onlinejudge
+    );
     let url = "https://acmicpc.net/".parse::<Url>().unwrap();
     let jar = Jar::default();
     jar.add_cookie_str(&cookie, &url);
@@ -16,7 +28,7 @@ pub fn submit_solution(cookies: &Cookies, problem_id: &str, source: &str, langua
     let client = Client::builder()
         .user_agent(UA)
         .cookie_store(true)
-        .cookie_provider(jar.clone())
+        .cookie_provider(jar)
         .build()
         .unwrap();
     let submit_page = format!("https://www.acmicpc.net/submit/{}", problem_id); // TODO check contest submissions
@@ -28,7 +40,7 @@ pub fn submit_solution(cookies: &Cookies, problem_id: &str, source: &str, langua
         println!("Submit page access failed. Please log in.");
         return;
     }
-    
+
     let html = Html::parse_document(&output);
     let code_open_selector = Selector::parse(r#"input[name="code_open"][checked]"#).unwrap();
     let code_open_el = html.select(&code_open_selector).next().unwrap();
@@ -42,20 +54,23 @@ pub fn submit_solution(cookies: &Cookies, problem_id: &str, source: &str, langua
         ("language", &language.to_string()),
         ("code_open", &code_open),
         ("source", source),
-        ("csrf_key", csrf_key)
+        ("csrf_key", csrf_key),
     ];
     let mut res = client.post(&submit_page).form(&form_data).send().unwrap();
     output.clear();
     res.read_to_string(&mut output).unwrap();
-    
+
     let html = Html::parse_document(&output);
     let sol_selector = Selector::parse(r#"tbody tr"#).unwrap();
     let sol_el = html.select(&sol_selector).next().unwrap();
     let sol_id = sol_el.value().id().unwrap();
-    let sol_id_no = sol_id.split('-').skip(1).next().unwrap();
+    let sol_id_no = sol_id.split('-').nth(1).unwrap();
 
     let url = res.url().as_str();
-    println!("Submit successful (sol ID {}). Check your submission at {}", sol_id_no, url);
+    println!(
+        "Submit successful (sol ID {}). Check your submission at {}",
+        sol_id_no, url
+    );
     print!("Or press Enter to fetch the judging status. Press any other key and Enter to exit. ");
     let mut stdout = std::io::stdout();
     stdout.flush().unwrap();
@@ -63,13 +78,16 @@ pub fn submit_solution(cookies: &Cookies, problem_id: &str, source: &str, langua
         let mut buf = String::new();
         let stdin = std::io::stdin();
         stdin.read_line(&mut buf).unwrap();
-        if !buf.trim().is_empty() { break; }
+        if !buf.trim().is_empty() {
+            break;
+        }
 
         let mut res = client.get(url).send().unwrap();
         let mut output = String::new();
         res.read_to_string(&mut output).unwrap();
         let html = Html::parse_document(&output);
-        let sol_selector = Selector::parse(&format!("#{} td.result span.result-text", sol_id)).unwrap();
+        let sol_selector =
+            Selector::parse(&format!("#{} td.result span.result-text", sol_id)).unwrap();
         let sol_el = html.select(&sol_selector).next().unwrap();
         let classes = sol_el.value().classes().collect::<Vec<_>>();
         let verdict = classify_class(&classes);

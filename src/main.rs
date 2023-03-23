@@ -1,6 +1,6 @@
-mod submit;
-mod optparse;
 mod datastore;
+mod optparse;
+mod submit;
 mod test;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
@@ -37,7 +37,9 @@ fn main() -> Result<()> {
             let mut credentials = datastore::Credentials::load();
             credentials.remove();
             let cookies = cookies.unwrap_or_else(|| {
-                println!("First log in to www.acmicpc.net on your browser with auto-login enabled.");
+                println!(
+                    "First log in to www.acmicpc.net on your browser with auto-login enabled."
+                );
                 println!("Then copy and paste two cookies for www.acmicpc.net from your browser.");
                 print!("bojautologin: ");
                 stdout.flush().unwrap();
@@ -47,16 +49,27 @@ fn main() -> Result<()> {
                 stdout.flush().unwrap();
                 let mut onlinejudge = String::new();
                 stdin.read_line(&mut onlinejudge).unwrap();
-                datastore::Cookies { bojautologin, onlinejudge }
+                datastore::Cookies {
+                    bojautologin,
+                    onlinejudge,
+                }
             });
             credentials.update_cookie(&cookies);
             println!("Cookies set.");
         }
-        Opts::Test(Test { problem_id, bin_or_cmd }) => {
+        Opts::Test(Test {
+            problem_id,
+            bin_or_cmd,
+        }) => {
             let bin_or_cmd = bin_or_cmd.unwrap_or(BinOrCmd::Bin("main".to_string()));
             test::test(&problem_id, &bin_or_cmd);
         }
-        Opts::Submit(Submit { problem_id, path, language, code_open }) => {
+        Opts::Submit(Submit {
+            problem_id,
+            path,
+            language,
+            code_open,
+        }) => {
             let language = language.unwrap_or(113);
             let credentials = datastore::Credentials::load();
             let Some(cookies) = &credentials.cookies else {
@@ -78,7 +91,13 @@ fn main() -> Result<()> {
                 }
                 return Ok(());
             };
-            submit::submit_solution(cookies, &problem_id, &source, language, code_open.map(|x| x.to_string()));
+            submit::submit_solution(
+                cookies,
+                &problem_id,
+                &source,
+                language,
+                code_open.map(|x| x.to_string()),
+            );
         }
     }
     Ok(())
