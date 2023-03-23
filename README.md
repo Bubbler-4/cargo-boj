@@ -1,19 +1,28 @@
 # Cargo-BOJ
 
-Test and submit solutions to BOJ problems
+Test and submit solutions to BOJ (Baekjoon Online Judge) problems.
+
+Defaults are geared towards Rust solutions, but non-Rust usage is supported as well.
+
+## Prerequisites
+
+A stable Rust toolchain.
 
 ## Installation
 
-For now:
-
 ```
-git clone https://github.com/Bubbler-4/cargo-boj.git
-cargo install --path=cargo-boj
+cargo install cargo-boj
 ```
 
 ## Usage
 
+The default usage of `test` and `submit` commands assume that `cargo boj` is being run at the crate root with
+either `src/main.rs` or `src/bin/main.rs` being the solution file.
+
 ### Login
+
+Logging in to BOJ with ID and password cannot be automated because it is protected with reCaptcha.
+So, the users are expected to log in on their own browser first, and then copy relevant cookies into `cargo-boj`.
 
 ```
 $ cargo boj login
@@ -32,6 +41,11 @@ $ cargo boj login --bojautologin=3b1adXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX --onli
 
 ### Test
 
+Tests your code against example test cases for the given problem.
+
+* Test cases are fetched once and then cached.
+* A colored diff is provided when a test fails with Wrong Answer.
+
 ```
 # Test main.rs against example test cases of problem 1000
 $ cargo boj test 1000
@@ -42,6 +56,11 @@ $ cargo boj test 1000 --cmd='python 1000.py'
 ```
 
 ### Submit
+
+Submits your code to BOJ using the credentials provided with `cargo boj login`.
+
+The default language is `Rust 2021` (language ID 113). To submit solutions in other languages,
+refer to [BOJ Help: language info](https://help.acmicpc.net/language/info).
 
 ```
 # Submit main.rs as Rust 2021 solution to problem 1000. Code open setting follows account preference
