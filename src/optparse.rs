@@ -104,8 +104,6 @@ fn cargo_boj_login() -> impl Parser<Login> {
     construct!(Login { cookies })
         .to_options()
         .descr("Store BOJ login information for submitting solutions.")
-        //.header("Footer")
-        //.footer("Footer")
         .command("login")
 }
 
@@ -149,13 +147,12 @@ fn cargo_boj_submit() -> impl Parser<Submit> {
         .argument("OPT")
         .optional();
     construct!(Submit {
-        problem_id,
         path,
         language,
-        code_open
+        code_open,
+        problem_id,
     })
     .to_options()
     .descr("Submit a solution to a BOJ problem.")
-    //.footer("Footer 2")
     .command("submit")
 }
