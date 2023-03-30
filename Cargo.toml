@@ -20,3 +20,4 @@ serde = { version = "1", features = ["derive"] }
 once_cell = "1"
 console = "0.15"
 similar = "2"
+crossterm = "0.26"
