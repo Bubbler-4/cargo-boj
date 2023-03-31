@@ -4,6 +4,8 @@ use reqwest::{blocking::Client, cookie::Jar, Url};
 use scraper::{Html, Selector};
 use std::io::{Read, Write};
 use std::sync::Arc;
+use std::time::{Instant, Duration};
+use crossterm::{terminal::{self, ClearType}, cursor, event::{self, Event}, execute};
 
 pub fn submit_solution(
     cookies: &Cookies,
@@ -68,20 +70,18 @@ pub fn submit_solution(
 
     let url = res.url().as_str();
     println!(
-        "Submit successful (sol ID {}). Check your submission at {}",
+        "Submit successful (sol ID {}). Status page: {}",
         sol_id_no, url
     );
-    print!("Or press Enter to fetch the judging status. Press any other key and Enter to exit. ");
-    let mut stdout = std::io::stdout();
-    stdout.flush().unwrap();
-    loop {
-        let mut buf = String::new();
-        let stdin = std::io::stdin();
-        stdin.read_line(&mut buf).unwrap();
-        if !buf.trim().is_empty() {
-            break;
-        }
+    println!("Press any key to exit.");
+    submit_loop(&client, url, sol_id);
+}
 
+fn submit_loop(client: &Client, url: &str, sol_id: &str) {
+    let mut stdout = std::io::stdout();
+    terminal::enable_raw_mode().unwrap();
+    execute!(stdout, cursor::SavePosition).unwrap();
+    'outer: loop {
         let mut res = client.get(url).send().unwrap();
         let mut output = String::new();
         res.read_to_string(&mut output).unwrap();
@@ -91,9 +91,23 @@ pub fn submit_solution(
         let sol_el = html.select(&sol_selector).next().unwrap();
         let classes = sol_el.value().classes().collect::<Vec<_>>();
         let verdict = classify_class(&classes);
+        execute!(stdout, terminal::Clear(ClearType::CurrentLine), cursor::RestorePosition).unwrap();
         print!("Current status: {} ", verdict);
         stdout.flush().unwrap();
+        if judge_finished(verdict) { break; }
+
+        let now = Instant::now();
+        while now.elapsed() < Duration::from_secs(1) {
+            if event::poll(Duration::from_secs(0)).unwrap() {
+                match event::read().unwrap() {
+                    Event::Key(_) => break 'outer,
+                    _ => {}
+                }
+            }
+        }
     }
+    terminal::disable_raw_mode().unwrap();
+    println!();
 }
 
 fn classify_class(classes: &[&str]) -> &'static str {
@@ -125,5 +139,12 @@ fn classify_class(classes: &[&str]) -> &'static str {
         "Cannot Judge"
     } else {
         "Unknown Error"
+    }
+}
+
+fn judge_finished(verdict: &str) -> bool {
+    match verdict {
+        "Pending" | "Compiling" | "Judging" => false,
+        _ => true
     }
 }
