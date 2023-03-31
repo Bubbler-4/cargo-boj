@@ -7,6 +7,7 @@ use similar::{ChangeTag, TextDiff};
 
 use crate::datastore::ProblemData;
 use crate::optparse::BinOrCmd;
+use crate::Result;
 
 fn precompile_bin(bin: &str) {
     let mut command = Command::new("cargo");
@@ -46,7 +47,7 @@ fn spawn_bin_or_cmd(bin_or_cmd: &BinOrCmd) -> Child {
     .unwrap()
 }
 
-fn run_test_case(bin_or_cmd: &BinOrCmd, spj: bool, input: &str, output: &str) {
+fn run_test_case(bin_or_cmd: &BinOrCmd, spj: bool, input: &str, output: &str) -> Result<()> {
     let mut handle = spawn_bin_or_cmd(bin_or_cmd);
     let now = std::time::Instant::now();
     let stdin = handle.stdin.as_mut().unwrap();
@@ -91,17 +92,22 @@ fn run_test_case(bin_or_cmd: &BinOrCmd, spj: bool, input: &str, output: &str) {
         }
     }
     if !spj && failed {
-        panic!("incorrect output");
+        std::io::stdout().flush()?;
+        eprintln!("{} on input:", Style::new().red().apply_to("Test failed"));
+        eprintln!("{}", input);
+        Err("")?
     }
     println!("Elapsed: {}.{:06}", elapsed / 1000000, elapsed % 1000000);
+    Ok(())
 }
 
-pub fn test(problem_id: &str, bin_or_cmd: &BinOrCmd) {
+pub fn test(problem_id: &str, bin_or_cmd: &BinOrCmd) -> Result<()> {
     if let BinOrCmd::Bin(bin) = bin_or_cmd {
         precompile_bin(bin);
     }
     let ProblemData { spj, testcases } = ProblemData::load(problem_id);
     for (input, output) in &testcases {
-        run_test_case(bin_or_cmd, spj, input, output);
+        run_test_case(bin_or_cmd, spj, input, output)?;
     }
+    Ok(())
 }

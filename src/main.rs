@@ -27,8 +27,17 @@ const UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (
 use optparse::*;
 use std::fs;
 use std::io::{self, Write};
+use std::process::ExitCode;
 
-fn main() -> Result<()> {
+fn main() -> ExitCode {
+    if inner_main().is_ok() {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::FAILURE
+    }
+}
+
+fn inner_main() -> Result<()> {
     let opts = cargo_boj_opts();
     match opts {
         Opts::Login(Login { cookies }) => {
@@ -62,7 +71,7 @@ fn main() -> Result<()> {
             bin_or_cmd,
         }) => {
             let bin_or_cmd = bin_or_cmd.unwrap_or(BinOrCmd::Bin("main".to_string()));
-            test::test(&problem_id, &bin_or_cmd);
+            test::test(&problem_id, &bin_or_cmd)?;
         }
         Opts::Submit(Submit {
             problem_id,
