@@ -34,6 +34,10 @@ fn cache_file(problem_id: &str) -> PathBuf {
     let mut file = CACHE_DIR.clone();
     if problem_id.contains('/') {
         file.push("contest");
+        file.push(problem_id);
+        file.pop();
+        fs::create_dir_all(file.clone()).unwrap();
+        file.pop();
     }
     file.push(problem_id);
     let file_handle = fs::OpenOptions::new()

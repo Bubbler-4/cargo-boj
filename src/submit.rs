@@ -33,7 +33,12 @@ pub fn submit_solution(
         .cookie_provider(jar)
         .build()
         .unwrap();
-    let submit_page = format!("https://www.acmicpc.net/submit/{}", problem_id); // TODO check contest submissions
+    let submit_page = if problem_id.contains('/') {
+        format!("https://www.acmicpc.net/contest/submit/{}", problem_id)
+    } else {
+        format!("https://www.acmicpc.net/submit/{}", problem_id)
+    };
+    // let submit_page = format!("https://www.acmicpc.net/submit/{}", problem_id); // TODO check contest submissions
     let get = client.get(&submit_page);
     let mut res = get.send().unwrap();
     let mut output = String::new();
@@ -51,13 +56,22 @@ pub fn submit_solution(
     let csrf_selector = Selector::parse(r#"[name="csrf_key"]"#).unwrap();
     let csrf_el = html.select(&csrf_selector).next().unwrap();
     let csrf_key = csrf_el.value().attr("value").unwrap();
-    let form_data = [
-        ("problem_id", problem_id),
-        ("language", &language.to_string()),
+    let lang_string = language.to_string();
+    let mut form_data = if problem_id.contains('/') {
+        let mut words = problem_id.split('/');
+        vec![
+            ("contest_id", words.next().unwrap()),
+            ("contest_number", words.next().unwrap())
+        ]
+    } else {
+        vec![("problem_id", problem_id)]
+    };
+    form_data.extend_from_slice(&[
+        ("language", &lang_string),
         ("code_open", &code_open),
         ("source", source),
         ("csrf_key", csrf_key),
-    ];
+    ]);
     let mut res = client.post(&submit_page).form(&form_data).send().unwrap();
     output.clear();
     res.read_to_string(&mut output).unwrap();
