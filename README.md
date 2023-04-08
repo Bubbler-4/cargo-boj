@@ -68,3 +68,9 @@ $ cargo boj submit 1000
 # Submit sol_1000.rs as Rust 2018 solution, with code closed
 $ cargo boj submit 1000 --path=src/bin/sol_1000.rs --lang=94 --code-open=n
 ```
+
+## Using within BOJ contest
+
+When you open a problem in a contest, the address will be like `https://www.acmicpc.net/contest/problem/963/1`.
+Then the problem ID for this problem is `963/1`.
+You can use this ID in place of "problem ID" when using `cargo boj test` and `cargo boj submit`.
