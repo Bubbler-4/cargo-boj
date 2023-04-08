@@ -1,11 +1,16 @@
 use crate::datastore::Cookies;
 use crate::UA;
+use crossterm::{
+    cursor,
+    event::{self, Event},
+    execute,
+    terminal::{self, ClearType},
+};
 use reqwest::{blocking::Client, cookie::Jar, Url};
 use scraper::{Html, Selector};
 use std::io::{Read, Write};
 use std::sync::Arc;
-use std::time::{Instant, Duration};
-use crossterm::{terminal::{self, ClearType}, cursor, event::{self, Event}, execute};
+use std::time::{Duration, Instant};
 
 pub fn submit_solution(
     cookies: &Cookies,
@@ -38,7 +43,6 @@ pub fn submit_solution(
     } else {
         format!("https://www.acmicpc.net/submit/{}", problem_id)
     };
-    // let submit_page = format!("https://www.acmicpc.net/submit/{}", problem_id); // TODO check contest submissions
     let get = client.get(&submit_page);
     let mut res = get.send().unwrap();
     let mut output = String::new();
@@ -61,7 +65,7 @@ pub fn submit_solution(
         let mut words = problem_id.split('/');
         vec![
             ("contest_id", words.next().unwrap()),
-            ("contest_number", words.next().unwrap())
+            ("contest_number", words.next().unwrap()),
         ]
     } else {
         vec![("problem_id", problem_id)]
@@ -105,18 +109,24 @@ fn submit_loop(client: &Client, url: &str, sol_id: &str) {
         let sol_el = html.select(&sol_selector).next().unwrap();
         let classes = sol_el.value().classes().collect::<Vec<_>>();
         let verdict = classify_class(&classes);
-        execute!(stdout, terminal::Clear(ClearType::CurrentLine), cursor::RestorePosition).unwrap();
+        execute!(
+            stdout,
+            terminal::Clear(ClearType::CurrentLine),
+            cursor::RestorePosition
+        )
+        .unwrap();
         print!("Current status: {} ", verdict);
         stdout.flush().unwrap();
-        if judge_finished(verdict) { break; }
+        if judge_finished(verdict) {
+            break;
+        }
 
         let now = Instant::now();
         while now.elapsed() < Duration::from_secs(1) {
             if event::poll(Duration::from_secs(0)).unwrap() {
-                match event::read().unwrap() {
-                    Event::Key(_) => break 'outer,
-                    _ => {}
-                }
+                if let Event::Key(_) = event::read().unwrap() {
+                    break 'outer;
+                };
             }
         }
     }
@@ -157,8 +167,5 @@ fn classify_class(classes: &[&str]) -> &'static str {
 }
 
 fn judge_finished(verdict: &str) -> bool {
-    match verdict {
-        "Pending" | "Compiling" | "Judging" => false,
-        _ => true
-    }
+    !matches!(verdict, "Pending" | "Compiling" | "Judging")
 }
