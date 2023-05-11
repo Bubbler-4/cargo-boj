@@ -14,6 +14,8 @@ A stable Rust toolchain.
 cargo install cargo-boj
 ```
 
+You can use the same command to update to the latest version.
+
 ## Usage
 
 The default usage of `test` and `submit` commands assume that `cargo boj` is being run at the crate root with
