@@ -27,6 +27,7 @@ fn spawn_bin_or_cmd(bin_or_cmd: &BinOrCmd) -> Child {
         BinOrCmd::Bin(bin) => {
             let mut path = "target/release".parse::<PathBuf>().unwrap();
             path.push(bin);
+            path.set_extension(std::env::consts::EXE_EXTENSION);
             Command::new(&path)
         }
         BinOrCmd::Cmd(cmd) => {
