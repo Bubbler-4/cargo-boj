@@ -9,10 +9,10 @@ use crate::datastore::ProblemData;
 use crate::optparse::BinOrCmd;
 use crate::Result;
 
-fn precompile_bin(bin: &str) {
+fn precompile_bin(bin: &str) -> Result<()> {
     let mut command = Command::new("cargo");
     command.args(["build", "--bin", bin, "--release"]);
-    command
+    let exitstatus = command
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null())
@@ -20,6 +20,10 @@ fn precompile_bin(bin: &str) {
         .unwrap()
         .wait()
         .unwrap();
+    if !exitstatus.success() {
+        Err(format!("Error: `cargo build --bin {} --release` failed.", bin))?
+    }
+    Ok(())
 }
 
 fn spawn_bin_or_cmd(bin_or_cmd: &BinOrCmd) -> Child {
@@ -42,7 +46,6 @@ fn spawn_bin_or_cmd(bin_or_cmd: &BinOrCmd) -> Child {
             }
         }
     };
-    dbg!(&command);
     command
     .stdin(Stdio::piped())
     .stdout(Stdio::piped())
@@ -104,13 +107,34 @@ fn run_test_case(bin_or_cmd: &BinOrCmd, spj: bool, input: &str, output: &str) ->
     Ok(())
 }
 
-pub fn test(problem_id: &str, bin_or_cmd: &BinOrCmd) -> Result<()> {
-    if let BinOrCmd::Bin(bin) = bin_or_cmd {
-        precompile_bin(bin);
+fn default_bin() -> Result<String> {
+    let src_main = "src/main.rs".parse::<PathBuf>().unwrap();
+    if src_main.exists() {
+        let current_dir = std::env::current_dir()?;
+        let x = current_dir.file_name().unwrap();
+        return Ok(x.to_str().unwrap().to_owned());
+    }
+    let src_bin_main = "src/bin/main.rs".parse::<PathBuf>().unwrap();
+    if src_bin_main.exists() {
+        return Ok("main".to_owned());
+    }
+    Err("Error: Neither src/main.rs nor src/bin/main.rs is present. Please specify --bin flag.")?
+}
+
+pub fn test(problem_id: &str, bin_or_cmd: Option<BinOrCmd>) -> Result<()> {
+    let bin_or_cmd = match bin_or_cmd {
+        Some(inner) => inner,
+        None => {
+            let bin = default_bin()?;
+            BinOrCmd::Bin(bin)
+        }
+    };
+    if let BinOrCmd::Bin(ref bin) = bin_or_cmd {
+        precompile_bin(bin)?;
     }
     let ProblemData { spj, testcases } = ProblemData::load(problem_id);
     for (input, output) in &testcases {
-        run_test_case(bin_or_cmd, spj, input, output)?;
+        run_test_case(&bin_or_cmd, spj, input, output)?;
     }
     Ok(())
 }

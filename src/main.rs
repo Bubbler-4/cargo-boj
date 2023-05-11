@@ -70,8 +70,8 @@ fn inner_main() -> Result<()> {
             problem_id,
             bin_or_cmd,
         }) => {
-            let bin_or_cmd = bin_or_cmd.unwrap_or(BinOrCmd::Bin("main".to_string()));
-            test::test(&problem_id, &bin_or_cmd)?;
+            // let bin_or_cmd = bin_or_cmd.unwrap_or(BinOrCmd::Bin("main".to_string()));
+            test::test(&problem_id, bin_or_cmd)?;
         }
         Opts::Submit(Submit {
             problem_id,

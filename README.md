@@ -20,6 +20,7 @@ You can use the same command to update to the latest version.
 
 The default usage of `test` and `submit` commands assume that `cargo boj` is being run at the crate root with
 either `src/main.rs` or `src/bin/main.rs` being the solution file.
+`src/main.rs` takes precedence if both are present.
 
 ### Login
 
@@ -51,7 +52,7 @@ Tests your code against example test cases for the given problem.
 ```
 # Test main.rs against example test cases of problem 1000
 $ cargo boj test 1000
-# Test sol_1000.rs
+# Test src/bin/sol_1000.rs
 $ cargo boj test 1000 --bin=sol_1000
 # Test 1000.py
 $ cargo boj test 1000 --cmd='python 1000.py'
@@ -79,6 +80,8 @@ You can use this ID in place of "problem ID" when using `cargo boj test` and `ca
 
 ## Changelog
 
+* 0.3.3
+  * Fix `cargo boj test` trying to run incorrect executable name when the file to run is `src/main.rs`
 * 0.3.1
   * Fix `cargo boj test` failing to find the built executable on Windows
 * 0.3.0
