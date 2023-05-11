@@ -23,7 +23,7 @@ fn precompile_bin(bin: &str) {
 }
 
 fn spawn_bin_or_cmd(bin_or_cmd: &BinOrCmd) -> Child {
-    match bin_or_cmd {
+    let mut command = match bin_or_cmd {
         BinOrCmd::Bin(bin) => {
             let mut path = "target/release".parse::<PathBuf>().unwrap();
             path.push(bin);
@@ -41,7 +41,9 @@ fn spawn_bin_or_cmd(bin_or_cmd: &BinOrCmd) -> Child {
                 command
             }
         }
-    }
+    };
+    dbg!(&command);
+    command
     .stdin(Stdio::piped())
     .stdout(Stdio::piped())
     .spawn()
