@@ -30,10 +30,11 @@ use std::io::{self, Write};
 use std::process::ExitCode;
 
 fn main() -> ExitCode {
-    if inner_main().is_ok() {
-        ExitCode::SUCCESS
-    } else {
+    if let Err(s) = inner_main() {
+        eprintln!("{}", s);
         ExitCode::FAILURE
+    } else {
+        ExitCode::SUCCESS
     }
 }
 

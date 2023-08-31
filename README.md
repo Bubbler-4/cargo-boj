@@ -80,6 +80,8 @@ You can use this ID in place of "problem ID" when using `cargo boj test` and `ca
 
 ## Changelog
 
+* 0.4.0
+  * Fix some error messages from not showing when `cargo boj` exits
 * 0.3.3
   * Fix `cargo boj test` trying to run incorrect executable name when the file to run is `src/main.rs`
 * 0.3.1
