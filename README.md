@@ -57,10 +57,15 @@ Tests your code against example test cases for the given problem.
 ```
 # Test main.rs against example test cases of problem 1000
 $ cargo boj test 1000
+
 # Test src/bin/sol_1000.rs
 $ cargo boj test 1000 --bin=sol_1000
+
 # Test 1000.py
 $ cargo boj test 1000 --cmd='python 1000.py'
+
+# Test and submit problem 1008, but with user confirmation
+$ cargo boj test 1008 --spj-prompt && cargo boj submit 1008
 ```
 
 ### Submit
@@ -73,6 +78,7 @@ refer to [BOJ Help: language info](https://help.acmicpc.net/language/info).
 ```
 # Submit main.rs as Rust 2021 solution to problem 1000. Code open setting follows account preference
 $ cargo boj submit 1000
+
 # Submit sol_1000.rs as Rust 2018 solution, with code closed
 $ cargo boj submit 1000 --path=src/bin/sol_1000.rs --lang=94 --code-open=n
 ```
@@ -86,12 +92,13 @@ You can use this ID in place of "problem ID" when using `cargo boj test` and `ca
 ## Changelog
 
 * 0.5.0
-  * 
+    * Treat "Score" problems the same as Special Judge
+    * Add `-p, --spj-prompt` option to `cargo boj test`
 * 0.4.0
-  * Fix some error messages from not showing when `cargo boj` exits
+    * Fix some error messages from not showing when `cargo boj` exits
 * 0.3.3
-  * Fix `cargo boj test` trying to run incorrect executable name when the file to run is `src/main.rs`
+    * Fix `cargo boj test` trying to run incorrect executable name when the file to run is `src/main.rs`
 * 0.3.1
-  * Fix `cargo boj test` failing to find the built executable on Windows
+    * Fix `cargo boj test` failing to find the built executable on Windows
 * 0.3.0
-  * Add support for BOJ contests
+    * Add support for BOJ contests
