@@ -1,6 +1,6 @@
 [package]
 name = "cargo-boj"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2021"
 license = "MIT"
 description = "Cargo-BOJ: test and submit solutions to BOJ problems"
@@ -13,11 +13,11 @@ categories = ["command-line-utilities", "development-tools::cargo-plugins"]
 [dependencies]
 reqwest = { version = "0.11", features = ["blocking", "cookies"] }
 serde_json = "1"
-scraper = "0.15"
-directories = "4"
-bpaf = { version = "0.7", features = ["batteries"] }
+scraper = "0.18"
+directories = "5"
+bpaf = { version = "0.9", features = ["batteries"] }
 serde = { version = "1", features = ["derive"] }
 once_cell = "1"
 console = "0.15"
 similar = "2"
-crossterm = "0.26"
+crossterm = "0.27"
