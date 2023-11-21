@@ -1,8 +1,11 @@
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
+use std::time::Duration;
 
 use console::Style;
+use crossterm::event::{Event, KeyCode};
+use crossterm::{terminal, event};
 use similar::{ChangeTag, TextDiff};
 
 use crate::datastore::ProblemData;
@@ -104,7 +107,11 @@ fn run_test_case(bin_or_cmd: &BinOrCmd, spj: bool, input: &str, output: &str) ->
         Err("")?
     }
     println!("Elapsed: {}.{:06}", elapsed / 1000000, elapsed % 1000000);
-    Ok(())
+    if !failed {
+        Ok(())
+    } else {
+        Err("")?
+    }
 }
 
 fn default_bin() -> Result<String> {
@@ -121,7 +128,7 @@ fn default_bin() -> Result<String> {
     Err("Error: Neither src/main.rs nor src/bin/main.rs is present. Please specify --bin flag.")?
 }
 
-pub fn test(problem_id: &str, bin_or_cmd: Option<BinOrCmd>) -> Result<()> {
+pub fn test(problem_id: &str, bin_or_cmd: Option<BinOrCmd>, spj_prompt: bool) -> Result<()> {
     let bin_or_cmd = match bin_or_cmd {
         Some(inner) => inner,
         None => {
@@ -133,8 +140,27 @@ pub fn test(problem_id: &str, bin_or_cmd: Option<BinOrCmd>) -> Result<()> {
         precompile_bin(bin)?;
     }
     let ProblemData { spj, testcases } = ProblemData::load(problem_id);
+    let mut failed = false;
     for (input, output) in &testcases {
-        run_test_case(&bin_or_cmd, spj, input, output)?;
+        let result = run_test_case(&bin_or_cmd, spj, input, output);
+        failed = failed || result.is_err();
+        if !spj { result?; }
+    }
+    if spj && spj_prompt && failed {
+        print!("Press Enter to proceed, any other key to abort:");
+        let mut stdout = std::io::stdout();
+        stdout.flush()?;
+        terminal::enable_raw_mode().unwrap();
+        let proceed = loop {
+            if event::poll(Duration::from_secs(0)).unwrap() {
+                if let Event::Key(key) = event::read().unwrap() {
+                    break key.code == KeyCode::Enter;
+                };
+            }
+        };
+        terminal::disable_raw_mode().unwrap();
+        println!();
+        if !proceed { Err("")? }
     }
     Ok(())
 }

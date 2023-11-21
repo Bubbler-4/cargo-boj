@@ -64,7 +64,7 @@ impl ProblemData {
         let res = get(url).unwrap().text().unwrap();
         let html = Html::parse_document(&res);
         let spj_selector =
-            Selector::parse("span.problem-label-spj, span.problem-label-two-steps").unwrap();
+            Selector::parse("span.problem-label-spj, span.problem-label-two-steps, span.problem-label-partial").unwrap();
         let mut it = html.select(&spj_selector);
         let spj = it.next().is_some();
         let selector = Selector::parse("pre.sampledata").unwrap();

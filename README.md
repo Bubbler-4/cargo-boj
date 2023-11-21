@@ -48,6 +48,11 @@ Tests your code against example test cases for the given problem.
 
 * Test cases are fetched once and then cached.
 * A colored diff is provided when a test fails with Wrong Answer.
+* The exit status is 1 if and only if:
+    * the problem is not one of "Special Judge (스페셜 저지)", "Two Steps (투 스텝)", or "Score (점수)", and
+    * the output is not identical to the expected output and/or the program finished with a runtime error.
+* `-p, --spj-prompt` flag is provided so that you can chain `test` and `submit` commands and still avoid submitting
+    obviously incorrect solutions to SPJ problems.
 
 ```
 # Test main.rs against example test cases of problem 1000
@@ -80,6 +85,8 @@ You can use this ID in place of "problem ID" when using `cargo boj test` and `ca
 
 ## Changelog
 
+* 0.5.0
+  * 
 * 0.4.0
   * Fix some error messages from not showing when `cargo boj` exits
 * 0.3.3

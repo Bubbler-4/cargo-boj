@@ -21,6 +21,7 @@ pub struct Login {
 pub struct Test {
     pub problem_id: String,
     pub bin_or_cmd: Option<BinOrCmd>,
+    pub spj_prompt: bool,
 }
 
 pub enum BinOrCmd {
@@ -117,12 +118,17 @@ fn cargo_boj_test() -> impl Parser<Test> {
         .long("cmd")
         .help("Command to run a non-Rust program")
         .argument("CMD");
+    let spj_prompt = short('p')
+        .long("spj-prompt")
+        .help("If set, ask the user for confirmation for Special Judge problems")
+        .switch();
     let bin = construct!(BinOrCmd::Bin(bin));
     let cmd = construct!(BinOrCmd::Cmd(cmd));
     let bin_or_cmd = construct!([bin, cmd]).optional();
     construct!(Test {
         bin_or_cmd,
-        problem_id
+        problem_id,
+        spj_prompt
     })
     .to_options()
     .descr("Test a solution against example tests.")
