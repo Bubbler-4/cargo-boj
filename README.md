@@ -91,6 +91,8 @@ You can use this ID in place of "problem ID" when using `cargo boj test` and `ca
 
 ## Changelog
 
+* 0.5.1
+    * Fix the issue around `-p` argument not following bpaf rules
 * 0.5.0
     * Treat "Score" problems the same as Special Judge
     * Add `-p, --spj-prompt` option to `cargo boj test`
