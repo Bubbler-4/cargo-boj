@@ -127,8 +127,8 @@ fn cargo_boj_test() -> impl Parser<Test> {
     let bin_or_cmd = construct!([bin, cmd]).optional();
     construct!(Test {
         bin_or_cmd,
-        problem_id,
-        spj_prompt
+        spj_prompt,
+        problem_id
     })
     .to_options()
     .descr("Test a solution against example tests.")
