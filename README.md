@@ -46,10 +46,10 @@ $ cargo boj login --bojautologin=3b1adXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX --onli
 
 Tests your code against example test cases for the given problem.
 
-* Test cases are fetched once and then cached.
+* Test cases are fetched once and then cached. The cache can be refreshed with `-r, --refresh` flag.
 * A colored diff is provided when a test fails with Wrong Answer.
 * The exit status is 1 if and only if:
-    * the problem is not one of "Special Judge (스페셜 저지)", "Two Steps (투 스텝)", or "Score (점수)", and
+    * the problem is not one of "Special Judge (스페셜 저지)", "Score (점수)", "Two Steps (투 스텝)", or "Interactive (인터랙티브)", and
     * the output is not identical to the expected output and/or the program finished with a runtime error.
 * `-p, --spj-prompt` flag is provided so that you can chain `test` and `submit` commands and still avoid submitting
     obviously incorrect solutions to SPJ problems.
@@ -91,6 +91,9 @@ You can use this ID in place of "problem ID" when using `cargo boj test` and `ca
 
 ## Changelog
 
+* 0.6.0
+    * Change handling of "Two Step" and "Interactive" problems to not run the sample tests at all
+    * Add `-r, --refresh` option to `cargo boj test`
 * 0.5.1
     * Fix the issue around `-p` argument not following bpaf rules
 * 0.5.0

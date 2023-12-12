@@ -22,6 +22,7 @@ pub struct Test {
     pub problem_id: String,
     pub bin_or_cmd: Option<BinOrCmd>,
     pub spj_prompt: bool,
+    pub refresh: bool,
 }
 
 pub enum BinOrCmd {
@@ -122,12 +123,17 @@ fn cargo_boj_test() -> impl Parser<Test> {
         .long("spj-prompt")
         .help("If set, ask the user for confirmation for Special Judge problems")
         .switch();
+    let refresh = short('r')
+        .long("refresh")
+        .help("If set, refresh the cache for the problem")
+        .switch();
     let bin = construct!(BinOrCmd::Bin(bin));
     let cmd = construct!(BinOrCmd::Cmd(cmd));
     let bin_or_cmd = construct!([bin, cmd]).optional();
     construct!(Test {
         bin_or_cmd,
         spj_prompt,
+        refresh,
         problem_id
     })
     .to_options()

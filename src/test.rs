@@ -128,7 +128,7 @@ fn default_bin() -> Result<String> {
     Err("Error: Neither src/main.rs nor src/bin/main.rs is present. Please specify --bin flag.")?
 }
 
-pub fn test(problem_id: &str, bin_or_cmd: Option<BinOrCmd>, spj_prompt: bool) -> Result<()> {
+pub fn test(problem_id: &str, bin_or_cmd: Option<BinOrCmd>, spj_prompt: bool, refresh: bool) -> Result<()> {
     let bin_or_cmd = match bin_or_cmd {
         Some(inner) => inner,
         None => {
@@ -139,7 +139,7 @@ pub fn test(problem_id: &str, bin_or_cmd: Option<BinOrCmd>, spj_prompt: bool) ->
     if let BinOrCmd::Bin(ref bin) = bin_or_cmd {
         precompile_bin(bin)?;
     }
-    let ProblemData { spj, testcases } = ProblemData::load(problem_id);
+    let ProblemData { spj, testcases } = ProblemData::load(problem_id, refresh);
     let mut failed = false;
     for (input, output) in &testcases {
         let result = run_test_case(&bin_or_cmd, spj, input, output);

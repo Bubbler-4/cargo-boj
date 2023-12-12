@@ -63,25 +63,33 @@ impl ProblemData {
         };
         let res = get(url).unwrap().text().unwrap();
         let html = Html::parse_document(&res);
+        // For SPJ and Partial Score problems, run and show the result, but do not mark as failure
         let spj_selector =
-            Selector::parse("span.problem-label-spj, span.problem-label-two-steps, span.problem-label-partial").unwrap();
+            Selector::parse("span.problem-label-spj, span.problem-label-partial").unwrap();
         let mut it = html.select(&spj_selector);
         let spj = it.next().is_some();
+        // For Interactive and Two Step problems, do not run the test cases at all
+        let dont_run_selector = Selector::parse("span.problem-label-two-steps, span.problem-label-interactive").unwrap();
+        let mut it = html.select(&dont_run_selector);
+        let dont_run = it.next().is_some();
+        
         let selector = Selector::parse("pre.sampledata").unwrap();
         let mut it = html.select(&selector);
         let mut testcases = vec![];
-        while let Some(inel) = it.next() {
-            let input = inel.text().collect::<String>();
-            let output = it.next().unwrap().text().collect::<String>();
-            testcases.push((input, output));
+        if !dont_run {
+            while let Some(inel) = it.next() {
+                let input = inel.text().collect::<String>();
+                let output = it.next().unwrap().text().collect::<String>();
+                testcases.push((input, output));
+            }
         }
         Self { spj, testcases }
     }
 
-    pub fn load(problem_id: &str) -> Self {
+    pub fn load(problem_id: &str, refresh: bool) -> Self {
         let cache_path = cache_file(problem_id);
         let cache_str = fs::read_to_string(cache_path.as_path()).unwrap();
-        serde_json::from_str(&cache_str).unwrap_or_else(|_e| {
+        serde_json::from_str(&cache_str).ok().filter(|_| !refresh).unwrap_or_else(|| {
             let data = Self::fetch_test_cases(problem_id);
             let cache_str = serde_json::to_string(&data).unwrap();
             fs::write(cache_path.as_path(), cache_str).unwrap();

@@ -71,9 +71,10 @@ fn inner_main() -> Result<()> {
             problem_id,
             bin_or_cmd,
             spj_prompt,
+            refresh,
         }) => {
             // let bin_or_cmd = bin_or_cmd.unwrap_or(BinOrCmd::Bin("main".to_string()));
-            test::test(&problem_id, bin_or_cmd, spj_prompt)?;
+            test::test(&problem_id, bin_or_cmd, spj_prompt, refresh)?;
         }
         Opts::Submit(Submit {
             problem_id,
