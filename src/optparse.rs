@@ -53,9 +53,23 @@ fn get_language_id_from_str(s: &str) -> usize {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LanguageTypeError;
+
+impl std::fmt::Display for LanguageTypeError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        "provided language id or name is not available".fmt(f)
+    }
+}
+
+impl Error for LanguageTypeError {
+    fn description(&self) -> &str {
+        "failed to find matching language id or name"
+    }
+}
+
 impl FromStr for LanguageType {
-    // TODO: find better way to define Err.
-    type Err = Box<dyn Error>;
+    type Err = LanguageTypeError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let lt = s.parse::<usize>();
