@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fmt;
 use std::str::FromStr;
+use std::fs;
 
 use bpaf::batteries::cargo_helper;
 use bpaf::*;
@@ -38,8 +39,22 @@ pub enum LanguageType {
 pub fn get_language_id(language: Option<LanguageType>) -> usize {
     match language {
         Some(LanguageType::Id(id)) => id,
-        Some(LanguageType::Name(_name)) => 113,
+        Some(LanguageType::Name(name)) => get_language_id_from_str(&name),
         None => 113,
+    }
+}
+
+fn get_language_id_from_str(s: &str) -> usize {
+    // TODO: store languageList in .config.
+    let data = fs::read_to_string("./assets/languageList.json")
+    .expect("Unable to read file");
+
+    let json: serde_json::Value = serde_json::from_str(&data)
+    .expect("JSON does not have correct format.");
+
+    match json.get(s) {
+        Some(serde_json::Value::Number(id)) => id.as_i64().unwrap() as usize,
+        _ => 113,
     }
 }
 

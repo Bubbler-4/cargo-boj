@@ -87,10 +87,11 @@ pub fn submit_solution(
     let sol_id_no = sol_id.split('-').nth(1).unwrap();
 
     let url = res.url().as_str();
-    println!(
-        "Submit successful (sol ID {}). Status page: {}",
-        sol_id_no, url
-    );
+    println!("Submit successful:");
+    println!("    Sol ID: {}", sol_id_no);
+    println!("    Language ID: {}", language);
+    println!("    Status page: {}", url);
+
     println!("Press any key to exit.");
     submit_loop(&client, url, sol_id);
 }
