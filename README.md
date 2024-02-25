@@ -73,7 +73,8 @@ $ cargo boj test 1008 --spj-prompt && cargo boj submit 1008
 Submits your code to BOJ using the credentials provided with `cargo boj login`.
 
 The default language is `Rust 2021` (language ID 113). To submit solutions in other languages,
-refer to [BOJ Help: language info](https://help.acmicpc.net/language/info).
+refer to [BOJ Help: language info](https://help.acmicpc.net/language/info).  
+Or you can use language name rather than language id.
 
 ```
 # Submit main.rs as Rust 2021 solution to problem 1000. Code open setting follows account preference
@@ -81,6 +82,9 @@ $ cargo boj submit 1000
 
 # Submit sol_1000.rs as Rust 2018 solution, with code closed
 $ cargo boj submit 1000 --path=src/bin/sol_1000.rs --lang=94 --code-open=n
+
+# Submit sol_1000.c as C99 (Clang) solution
+$ cargo boj submit 1000 --path=sol_1000.c --lang='C99 (Clang)'
 ```
 
 ## Using within BOJ contest
