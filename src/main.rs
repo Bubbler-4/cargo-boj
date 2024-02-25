@@ -82,7 +82,6 @@ fn inner_main() -> Result<()> {
             language,
             code_open,
         }) => {
-            // TODO: add lang-by-name support.
             let language = optparse::get_language_id(language);
             let credentials = datastore::Credentials::load();
             let Some(cookies) = &credentials.cookies else {

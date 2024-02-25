@@ -1,12 +1,12 @@
 use std::error::Error;
 use std::fmt;
 use std::str::FromStr;
-use std::fs;
 
 use bpaf::batteries::cargo_helper;
 use bpaf::*;
 
 use crate::datastore::Cookies;
+use crate::datastore::LanguageTypes;
 
 pub enum Opts {
     Login(Login),
@@ -45,14 +45,9 @@ pub fn get_language_id(language: Option<LanguageType>) -> usize {
 }
 
 fn get_language_id_from_str(s: &str) -> usize {
-    // TODO: store languageList in .config.
-    let data = fs::read_to_string("./assets/languageList.json")
-    .expect("Unable to read file");
+    let language_types = LanguageTypes::load();
 
-    let json: serde_json::Value = serde_json::from_str(&data)
-    .expect("JSON does not have correct format.");
-
-    match json.get(s) {
+    match language_types.language_types.get(s) {
         Some(serde_json::Value::Number(id)) => id.as_i64().unwrap() as usize,
         _ => 113,
     }

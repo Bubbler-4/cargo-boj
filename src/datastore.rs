@@ -5,6 +5,7 @@ use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
+use std::io::Write;
 
 static DIR: Lazy<ProjectDirs> =
     Lazy::new(|| ProjectDirs::from("com.github", "bubbler-4", "cargo-boj").unwrap());
@@ -21,6 +22,22 @@ static CONFIG_FILE: Lazy<PathBuf> = Lazy::new(|| {
         .create_new(true)
         .open(file.clone());
     drop(file_handle);
+    file
+});
+
+static LANGUAGE_LIST_FILE: Lazy<PathBuf> = Lazy::new(|| {
+    let language_list_str = include_str!("../assets/languageList.json");
+
+    let mut file = DIR.config_dir().to_path_buf();
+    file.push("languageList.json");
+    // create file if not exists, ignore any errors otherwise
+    let file_handle = fs::OpenOptions::new()
+        .append(true)
+        .create_new(true)
+        .open(file.clone()).unwrap();
+    writeln!(&file_handle, "{}", language_list_str).unwrap();
+    drop(file_handle);
+
     file
 });
 
@@ -134,5 +151,19 @@ impl Credentials {
         self.cookies = None;
         let config_str = serde_json::to_string(self).unwrap();
         fs::write(CONFIG_FILE.as_path(), config_str).unwrap();
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct LanguageTypes {
+    pub language_types: serde_json::Value,
+}
+
+impl LanguageTypes {
+    pub fn load() -> Self {
+        let language_list_str = fs::read_to_string(LANGUAGE_LIST_FILE.as_path()).unwrap();
+        Self {
+            language_types: serde_json::from_str(&language_list_str).unwrap_or_default(),
+        }
     }
 }
