@@ -30,10 +30,37 @@ pub enum BinOrCmd {
     Cmd(String),
 }
 
+pub enum LanguageType {
+    Id(usize),
+    Name(String),
+}
+
+pub fn get_language_id(language: Option<LanguageType>) -> usize {
+    match language {
+        Some(LanguageType::Id(id)) => id,
+        Some(LanguageType::Name(_name)) => 113,
+        None => 113,
+    }
+}
+
+impl FromStr for LanguageType {
+    // TODO: find better way to define Err.
+    type Err = Box<dyn Error>;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let lt = s.parse::<usize>();
+
+        match lt {
+            Ok(id) => Ok(Self::Id(id)),
+            Err(_) => Ok(Self::Name(String::from(s))),
+        }
+    }
+}
+
 pub struct Submit {
     pub problem_id: String,
     pub path: Option<String>,
-    pub language: Option<usize>,
+    pub language: Option<LanguageType>,
     pub code_open: Option<CodeOpen>,
 }
 
