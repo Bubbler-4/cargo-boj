@@ -31,11 +31,13 @@ static LANGUAGE_LIST_FILE: Lazy<PathBuf> = Lazy::new(|| {
     let mut file = DIR.config_dir().to_path_buf();
     file.push("languageList.json");
     // create file if not exists, ignore any errors otherwise
-    let file_handle = fs::OpenOptions::new()
+    let mut file_handle = fs::OpenOptions::new()
         .append(true)
         .create_new(true)
-        .open(file.clone()).unwrap();
-    writeln!(&file_handle, "{}", language_list_str).unwrap();
+        .open(file.clone());
+    if let Ok(handle) = file_handle.as_mut() {
+        writeln!(handle, "{}", language_list_str).unwrap();
+    }
     drop(file_handle);
 
     file
