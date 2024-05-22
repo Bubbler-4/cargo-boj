@@ -1,5 +1,7 @@
 # Cargo-BOJ
 
+**IMPORTANT NOTE:** Cargo-BOJ is no longer maintained because it can no longer scrape BOJ pages. As of May 2024, BOJ uses AWS WAF challenge, which requires running Javascript to pass through. [Gaboja](https://github.com/Bubbler-4/rust-problem-solving/tree/main/gaboja) is a rewrite using Webdriver with similar functionality.
+
 Test and submit solutions to BOJ (Baekjoon Online Judge) problems.
 
 Defaults are geared towards Rust solutions, but non-Rust usage is supported as well.
